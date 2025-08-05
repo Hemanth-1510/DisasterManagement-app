@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "90483820606",
+    "project_id": "disaster-management-a5f61",
+    "storage_bucket": "disaster-management-a5f61.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:90483820606:android:55aa6cb946fa15bbb5296f",
+        "android_client_info": {
+          "package_name": "com.example.disaster_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBeEBfDe4ubZsw-VrM7lOsqv0zCWiIvcGE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:90483820606:android:61b8cf2bf4722bdab5296f",
+        "android_client_info": {
+          "package_name": "com.example.firstly"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBeEBfDe4ubZsw-VrM7lOsqv0zCWiIvcGE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
