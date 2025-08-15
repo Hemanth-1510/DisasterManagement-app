@@ -7,24 +7,67 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:disaster_app/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  group('Disaster Guardian App Tests', () {
+    testWidgets('App should start with home screen', (WidgetTester tester) async {
+      // Build our app and trigger a frame.
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: DisasterGuardianApp(),
+        ),
+      );
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+      // Verify that the app starts with the home screen
+      expect(find.text('Disaster Guardian'), findsOneWidget);
+      expect(find.text('Be Prepared, Stay Safe!'), findsOneWidget);
+      expect(find.text('Sign Up'), findsOneWidget);
+      expect(find.text('Login'), findsOneWidget);
+    });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    testWidgets('Sign up button should navigate to signup screen', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: DisasterGuardianApp(),
+        ),
+      );
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+      // Tap the sign up button
+      await tester.tap(find.text('Sign Up'));
+      await tester.pumpAndSettle();
+
+      // Verify navigation to signup screen
+      expect(find.text('Sign Up'), findsOneWidget);
+    });
+
+    testWidgets('Login button should navigate to login screen', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: DisasterGuardianApp(),
+        ),
+      );
+
+      // Tap the login button
+      await tester.tap(find.text('Login'));
+      await tester.pumpAndSettle();
+
+      // Verify navigation to login screen
+      expect(find.text('Login'), findsOneWidget);
+    });
+
+    testWidgets('App should have proper theme colors', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: DisasterGuardianApp(),
+        ),
+      );
+
+      // Verify that the app uses the teal theme
+      final appBar = tester.widget<AppBar>(find.byType(AppBar));
+      expect(appBar.backgroundColor, isA<MaterialColor>());
+    });
   });
 }

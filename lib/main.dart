@@ -10,36 +10,63 @@ import 'auth_gate.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/signup_screen.dart';
 import 'screens/login_screen.dart';
+import 'services/notification_service.dart';
+import 'services/database_service.dart';
+import 'services/alert_polling_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  
+  // Initialize Hive for local storage
   await Hive.initFlutter();
   await Hive.openBox('alerts');
+  await Hive.openBox('user_preferences');
+  
+  // Initialize notification service
+  await NotificationService.initialize();
+  
+  // Initialize database service
+  final databaseService = DatabaseService();
+  await databaseService.database; // Initialize SQLite database
 
-  final container = ProviderContainer();
-  await container
-      .read(notificationServiceProvider);
-
-  runApp(UncontrolledProviderScope(
-    container: container,
-    child: const DisasterGuardianApp(),
+  runApp(const ProviderScope(
+    child: DisasterGuardianApp(),
   ));
+
+  // Start periodic nearby alerts polling (weather + disasters)
+  // Runs while the app is in foreground. Adjust interval/radius as needed.
+  AlertPollingService.instance.start(
+    every: const Duration(minutes: 15),
+    radiusInKm: 50,
+  );
 }
 
-class DisasterGuardianApp extends StatelessWidget {
+class DisasterGuardianApp extends ConsumerWidget {
   const DisasterGuardianApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isDarkMode = ref.watch(isDarkModeProvider);
+    
     return MaterialApp(
       title: 'Disaster Guardian',
       theme: ThemeData(
         useMaterial3: true,
         colorSchemeSeed: Colors.teal,
         fontFamily: GoogleFonts.poppins().fontFamily,
+        brightness: isDarkMode ? Brightness.dark : Brightness.light,
+      ),
+      darkTheme: ThemeData(
+        useMaterial3: true,
+        colorSchemeSeed: Colors.teal,
+        fontFamily: GoogleFonts.poppins().fontFamily,
+        brightness: Brightness.dark,
       ),
       home: const AuthGate(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
@@ -53,8 +80,35 @@ class AuthGate extends ConsumerWidget {
 
     return authState.when(
       data: (user) => user != null ? const DashboardScreen() : const HomeScreen(),
-      loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
-      error: (e, _) => Scaffold(body: Center(child: Text('Error: $e'))),
+      loading: () => const Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('Loading Disaster Guardian...'),
+            ],
+          ),
+        ),
+      ),
+      error: (e, _) => Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.error_outline, size: 64, color: Colors.red),
+              SizedBox(height: 16),
+              Text('Error: $e'),
+              SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () => ref.refresh(authStateProvider),
+                child: Text('Retry'),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
